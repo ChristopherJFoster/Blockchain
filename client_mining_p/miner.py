@@ -1,5 +1,6 @@
 import hashlib
 import requests  # pylint: disable=F0401
+import time
 
 import sys
 
@@ -36,8 +37,11 @@ if __name__ == '__main__':
         last_proof = requests.get(f'{node}/last_proof').json()['last_proof']
         print('last_proof: ', last_proof)
         print('Looking for new proof...')
+        start = time.time()
         new_proof = proof_of_work(last_proof)
-        print('...success!', )
+        end = time.time()
+        print(
+            f'...success! Time taken find new proof: {round((end - start), 2)} seconds')
         # TODO: When found, POST it to the server {"proof": new_proof}
         server_response = requests.post(
             f'{node}/mine', json={'sender': 'chris', 'proof': new_proof}).json()
