@@ -41,14 +41,19 @@ if __name__ == '__main__':
 
     # Get miner_id from my_id file, or create one if needed
     try:
-        with open('my_id', 'r') as f:
+        with open('my_id', 'r+') as f:
             miner_id = f.read()
+            if miner_id == '':
+                miner_id = '1234'
+                f.write(miner_id)
         f.closed
     except FileNotFoundError:
         with open('my_id', 'w') as f:
             miner_id = '1234'
             f.write(miner_id)
         f.closed
+
+    print(miner_id)
 
     coins_mined = 0
     # Run forever until interrupted
