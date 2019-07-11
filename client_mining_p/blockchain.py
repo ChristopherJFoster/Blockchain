@@ -3,7 +3,7 @@ import json
 from time import time
 from uuid import uuid4
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request  # pylint: disable=F0401
 
 import sys
 
@@ -93,11 +93,13 @@ class Blockchain(object):
     @staticmethod
     def valid_proof(last_proof, proof):
         """
-        Validates the Proof:  Does hash(last_proof, proof) contain 4
+        Validates the Proof:  Does hash(last_proof, proof) contain 6
         leading zeroes?
         """
         guess = f'{last_proof}{proof}'.encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
+        print('server guess: ', guess)
+        print('server guess_hash: ', guess_hash)
         return guess_hash[:6] == "000000"
 
     def valid_chain(self, chain):
@@ -143,7 +145,7 @@ blockchain = Blockchain()
 @app.route('/last_proof', methods=['GET'])
 def last_proof():
     response = {
-        'proof': blockchain.chain[len(blockchain.chain) - 1]
+        'last_proof': blockchain.chain[len(blockchain.chain) - 1]['proof']
     }
     return jsonify(response), 200
 
@@ -151,12 +153,14 @@ def last_proof():
 @app.route('/mine', methods=['POST'])
 def mine():
     # request should be an object containing 'sender' and 'proof' properties
-    print(request.get_json())
     sender = request.get_json()['sender']
     proof = request.get_json()['proof']
     # We run the proof of work algorithm to get the next proof...
-    last_block = blockchain.last_block
+    last_block = blockchain.chain[len(blockchain.chain) - 1]
     last_proof = last_block['proof']
+
+    print('server last_proof: ', last_proof)
+    print('submitted proof', proof)
 
     if blockchain.valid_proof(last_proof, proof) is True:
         # We must receive a reward for finding the proof.
