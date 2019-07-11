@@ -1,5 +1,6 @@
 import hashlib
 import requests  # pylint: disable=F0401
+from uuid import uuid4
 
 import sys
 
@@ -46,7 +47,7 @@ if __name__ == '__main__':
         data = r.json()
         new_proof = proof_of_work(data.get('proof'))
 
-        post_data = {"proof": new_proof}
+        post_data = {"proof": new_proof, "miner_id": 1234}
 
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
