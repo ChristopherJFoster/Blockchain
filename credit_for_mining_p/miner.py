@@ -55,13 +55,12 @@ if __name__ == '__main__':
             f.write(miner_id)
         f.closed
 
-    print(miner_id)
+    print('miner_id: ', miner_id)
 
     coins_mined = 0
     # Run forever until interrupted
     while True:
         # Get the last proof from the server
-
         r = requests.get(url=node + "/last_proof")
         data = r.json()
         new_proof = proof_of_work(data.get('proof'))
