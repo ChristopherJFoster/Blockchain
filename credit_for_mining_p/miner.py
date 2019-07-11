@@ -44,12 +44,14 @@ if __name__ == '__main__':
         with open('my_id', 'r+') as f:
             miner_id = f.read()
             if miner_id == '':
-                miner_id = '1234'
+                miner_id = ''.join(str(i)
+                                   for i in [x for x in list(str(uuid4())) if x != '-'])
                 f.write(miner_id)
         f.closed
     except FileNotFoundError:
         with open('my_id', 'w') as f:
-            miner_id = '1234'
+            miner_id = ''.join(str(i)
+                               for i in [x for x in list(str(uuid4())) if x != '-'])
             f.write(miner_id)
         f.closed
 
