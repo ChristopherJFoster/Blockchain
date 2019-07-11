@@ -3,9 +3,9 @@ import json
 from time import time
 from uuid import uuid4
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request  # pylint: disable=F0401
 from urllib.parse import urlparse
-import requests
+import requests  # pylint: disable=F0401
 
 import sys
 

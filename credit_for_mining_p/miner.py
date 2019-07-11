@@ -1,5 +1,5 @@
 import hashlib
-import requests
+import requests  # pylint: disable=F0401
 
 import sys
 
