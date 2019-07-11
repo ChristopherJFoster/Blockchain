@@ -139,6 +139,11 @@ def last_proof():
 @app.route('/mine', methods=['POST'])
 def mine():
     # request should be an object containing 'sender' and 'proof' properties
+    values = request.get_json()
+    required = ['sender', 'proof']
+    if not all(k in values for k in required):
+        return 'Missing Values', 400
+
     sender = request.get_json()['sender']
     proof = request.get_json()['proof']
     # We run the proof of work algorithm to get the next proof...
@@ -169,7 +174,7 @@ def mine():
 
     else:
         response = {
-            'message': "Proof of Work Rejected"
+            'message': "Proof is invalid or was already submitted by another node."
         }
 
         return jsonify(response), 200
