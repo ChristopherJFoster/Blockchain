@@ -3,9 +3,9 @@ import json
 from time import time
 from uuid import uuid4
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request  # pylint: disable=F0401
 from urllib.parse import urlparse
-import requests
+import requests  # pylint: disable=F0401
 
 import sys
 
@@ -16,7 +16,22 @@ class Blockchain(object):
         self.current_transactions = []
         self.nodes = set()
 
-        self.new_block(previous_hash=1, proof=100)
+        self.create_genesis_block()
+
+    def create_genesis_block(self):
+        """
+        Create the genesis block and start the chain. Since it's hardcoded, this will be the same block for any and all nodes.
+        """
+
+        block = {
+            'index': 1,
+            'timestamp': 0,
+            'transactions': [],
+            'proof': 99,
+            'previous_hash': 1
+        }
+
+        self.chain.append(block)
 
     def new_block(self, proof, previous_hash=None):
         """
@@ -39,6 +54,7 @@ class Blockchain(object):
         self.current_transactions = []
 
         self.chain.append(block)
+        self.broadcast_new_block(block)
         return block
 
     def new_transaction(self, sender, recipient, amount):
@@ -175,6 +191,19 @@ class Blockchain(object):
 
         return False
 
+    def broadcast_new_block(self, block):
+        """
+        Alert neighbors in list of nodes that a new block has been mined. :param block: <Block> the block that has been mined and added to the chain.
+        """
+
+        post_data = {"block": block}
+
+        for node in self.nodes:
+            r = requests.post(f'http://{node}/block/new', json=post_data)
+            if r.status_code != 200:
+                # TODO: Error handling
+                pass
+
 
 # Instantiate our Node
 app = Flask(__name__)
@@ -279,6 +308,37 @@ def register_nodes():
         'total_nodes': list(blockchain.nodes),
     }
     return jsonify(response), 201
+
+
+@app.route('/block/new', methods=['POST'])
+def new_block():
+    values = request.get_json()
+
+    # Check that the required fields are in the POST'ed data
+    required = ['block']
+    if not all(k in values for k in required):
+        return 'Missing Values', 400
+
+    # TODO: Validate that sender is actually an approved peer node
+
+    # Validate block
+
+    # Check that index is exactly one greater than last block in the chain
+    new_block = values['block']
+    last_block = blockchain.last_block
+
+    if new_block['index'] == last_block['index'] + 1:
+        # Check that the block's last hash matches the hash in the last block in the chain
+        if new_block['previous_hash'] == blockchain.hash(last_block):
+            # Validate the proof in the new block
+            if blockchain.valid_proof(last_block['proof'], new_block['proof']):
+                # The proof is valid. Add block to the chain.
+                blockchain.chain.append(new_block)
+                return 'Block Accepted', 200
+
+    # TODO: print error message
+    # TODO: request the chain from our peers and check for consensus
+    return 'Block Rejected', 200
 
 
 @app.route('/nodes/resolve', methods=['GET'])
