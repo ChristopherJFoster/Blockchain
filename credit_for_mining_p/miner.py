@@ -43,15 +43,22 @@ if __name__ == '__main__':
     try:
         with open('my_id', 'r+') as f:
             miner_id = f.read()
+            # if my_id is empty...
             if miner_id == '':
+                # ...generate a uuid and remove the '-'s
                 miner_id = ''.join(str(i)
                                    for i in [x for x in list(str(uuid4())) if x != '-'])
+                # write the uuid to my_id
                 f.write(miner_id)
         f.closed
+    # If no my_id file...
     except FileNotFoundError:
+        # ...create one
         with open('my_id', 'w') as f:
+            # generate a uuid and remove the '-'s
             miner_id = ''.join(str(i)
                                for i in [x for x in list(str(uuid4())) if x != '-'])
+            # write the uuid to my_id
             f.write(miner_id)
         f.closed
 
